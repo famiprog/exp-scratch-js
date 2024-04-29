@@ -5,6 +5,7 @@ import {
   
   import Stage from "../leopard/Stage/Stage.js";
   import Sprite1 from "../leopard/Sprite1/Sprite1.js";
+  import Sprite2 from "../leopard/Sprite2/Sprite2.js";
   import RoadTile from "../leopard/RoadTile/RoadTile.js";
   import RoadTileExt from "./RoadTileExt.js";
   
@@ -20,6 +21,16 @@ import {
       size: 100,
       visible: true,
       layerOrder: 4,
+    }),
+    Sprite2: new Sprite2({
+      x: -229,
+      y: 170,
+      direction: 90,
+      rotationStyle: Sprite.RotationStyle.ALL_AROUND,
+      costumeNumber: 1,
+      size: 100,
+      visible: true,
+      layerOrder: 3,
     }),
     RoadTile: new RoadTileExt({
       x: 0,
