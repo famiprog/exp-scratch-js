@@ -3,38 +3,16 @@ import {
   Sprite,
 } from "https://unpkg.com/leopard@^1/dist/index.esm.js";
 
-import Stage from "../leopard/Stage/Stage.js";
-import Sprite1 from "../leopard/Sprite1/Sprite1.js";
-import Sprite2 from "../leopard/Sprite2/Sprite2.js";
-import RoadTile from "../leopard/RoadTile/RoadTile.js";
-import RoadTileExt from "./RoadTileExt.js";
+import RoadTileComponent from "../leopard/RoadTileComponent/RoadTileComponent.js";
+import RailroadCrossingSignal from "../leopard/RailroadCrossingSignal/RailroadCrossingSignal.js";
+import StageExt from "./StageExt.js";
 import CityBus from "../leopard/CityBus/CityBus.js";
-import CityBusExt from "./CityBusExt.js";
+import Truck from "../leopard/Truck/Truck.js";
 
-const stage = new Stage({ costumeNumber: 1 });
+const stage = new StageExt({ costumeNumber: 1 });
 
-const sprites = {
-  Sprite1: new Sprite1({
-    x: -174,
-    y: 128,
-    direction: 180,
-    rotationStyle: Sprite.RotationStyle.ALL_AROUND,
-    costumeNumber: 1,
-    size: 100,
-    visible: true,
-    layerOrder: 4,
-  }),
-  Sprite2: new Sprite2({
-    x: -229,
-    y: 170,
-    direction: 90,
-    rotationStyle: Sprite.RotationStyle.ALL_AROUND,
-    costumeNumber: 1,
-    size: 100,
-    visible: true,
-    layerOrder: 3,
-  }),
-  RoadTile: new RoadTileExt({
+export const sprites = {
+  RoadTileComponent: new RoadTileComponent({
     x: 0,
     y: 0,
     direction: 90,
@@ -44,13 +22,33 @@ const sprites = {
     visible: false,
     layerOrder: 1,
   }),
-  CityBus: new CityBusExt({
+  CityBus: new CityBus({
     x: -180,
     y: -121,
     direction: 90,
     rotationStyle: Sprite.RotationStyle.ALL_AROUND,
     costumeNumber: 1,
     size: 30,
+    visible: true,
+    layerOrder: 4,
+  }),
+  Truck: new Truck({
+    x: -169,
+    y: -150,
+    direction: 90,
+    rotationStyle: Sprite.RotationStyle.ALL_AROUND,
+    costumeNumber: 2,
+    size: 30,
+    visible: true,
+    layerOrder: 5,
+  }),
+  RailroadCrossingSignal: new RailroadCrossingSignal({
+    x: -223,
+    y: 112,
+    direction: 90,
+    rotationStyle: Sprite.RotationStyle.ALL_AROUND,
+    costumeNumber: 1,
+    size: 100,
     visible: true,
     layerOrder: 4,
   }),
