@@ -1,3 +1,4 @@
+import { ViewportTransform } from "../ViewportTransform.js";
 import { sprites } from "../index.js";
 
 /**
@@ -20,8 +21,8 @@ export class RoadTile {
         sprites.RoadTileComponent.createClone();
         const clone = sprites.RoadTileComponent.clones[sprites.RoadTileComponent.clones.length - 1];
         clone.costume = type;
-        clone.goto(x, y);
         clone.visible = true;
+        return clone;
     }
 
     /**
@@ -53,7 +54,9 @@ export class RoadTile {
         this.type = type;
         this.x = x;
         this.y = y;
-        RoadTile.createComponent(type, x, y);
+        const sprite = RoadTile.createComponent(type, x, y);
+        sprite.worldObject = this;
+        ViewportTransform.instance.rerender(sprite);
     }
 
     /**
@@ -150,7 +153,7 @@ export class TileMovementController {
             // e.g. for we, len = 16, pos = 15
             vehicle.vars.currentTilePosition = updated.newPosition;
             const xy = this.getScreenCoordinates(tile, vehicle);
-            vehicle.goto(xy[0], xy[1]);
+            ViewportTransform.instance.setCoordinates(vehicle, xy[0], xy[1]);
             // console.log("tile", tile.type, tile.x, tile.y, "entered", vehicle.vars.currentTileEnteredThrough, "pos", vehicle.vars.currentTilePosition, "new xy", xy);
         } else {
             // e.g. for we, len = 16, pos = 17 or len = 16, pos = 16
