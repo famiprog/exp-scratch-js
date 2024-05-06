@@ -1,33 +1,30 @@
 import Stage from "../leopard/Stage/Stage.js";
 import { RoadTile, TileMovementController } from "./world/RoadTile.js";
-import { TreeMP, sprites } from "./index.js";
+import { sprites } from "./index.js";
 import { ViewportTransform } from "./ViewportTransform.js";
 import { Utils } from "./Utils.js";
+import Tree from "../leopard/Tree/Tree.js";
+import IsometricHouse from "../leopard/IsometricHouse/IsometricHouse.js";
+import IsometricHouse2 from "../leopard/IsometricHouse2/IsometricHouse2.js";
+import RailroadCrossingSignalExt from "./RailroadCrossingSignalExt.js";
 
 export default class StageExt extends Stage {
     *whenGreenFlagClicked() {
         yield* super.whenGreenFlagClicked();
 
-        const signal1 = Utils.cloneSprite(sprites.RailroadCrossingSignal);
-        ViewportTransform.instance.setCoordinates(signal1, -37, 5);
+        Utils.addToProject(this._project, new RailroadCrossingSignalExt(), -37, 5);
+        Utils.addToProject(this._project, new RailroadCrossingSignalExt(), -100, 54);
 
-        const signal2 = Utils.cloneSprite(sprites.RailroadCrossingSignal);
-        ViewportTransform.instance.setCoordinates(signal2, -100, 54);
+        const IsometricHouseExt = Utils.extend(IsometricHouse);
+        Utils.addToProject(this._project, new IsometricHouseExt(), 6, -100);
 
-        ViewportTransform.instance.setCoordinates(sprites.IsometricHouse, 6, -100);
-        ViewportTransform.instance.setCoordinates(sprites.IsometricHouse2, -156, 32);
+        const IsometricHouseExt2 = Utils.extend(IsometricHouse2);
+        Utils.addToProject(this._project, new IsometricHouseExt2(), -156, 32);
 
-        let tree = this._project.sprites[crypto.randomUUID()] = new TreeMP();
-        tree._project = this._project;
-        ViewportTransform.instance.setCoordinates(tree, -158, -96);
-
-        tree = this._project.sprites[crypto.randomUUID()] = new TreeMP();
-        tree._project = this._project;
-        ViewportTransform.instance.setCoordinates(tree, -118, -96);
-
-        tree = this._project.sprites[crypto.randomUUID()] = new TreeMP();
-        tree._project = this._project;
-        ViewportTransform.instance.setCoordinates(tree, -78, -96).setSpriteForSizeFineAdjustment(tree);
+        const TreeExt = Utils.extend(Tree);
+        Utils.addToProject(this._project, new TreeExt(), -158, -96);
+        Utils.addToProject(this._project, new TreeExt(), -118, -96);
+        Utils.addToProject(this._project, new TreeExt(), -78, -96);
 
         console.log("creating road")
 
