@@ -1,3 +1,4 @@
+import { Utils } from "../Utils.js";
 import { ViewportTransform } from "../ViewportTransform.js";
 import { sprites } from "../index.js";
 
@@ -11,19 +12,6 @@ const TILE_SIZE = 16;
 const OPPOSITE = { w: "e", e: "w", n: "s", s: "n" };
 
 export class RoadTile {
-
-    /**
-     * @param {RoadTileType} type
-     * @param {number} x 
-     * @param {number} y 
-     */
-    static createComponent(type, x, y) {
-        sprites.RoadTileComponent.createClone();
-        const clone = sprites.RoadTileComponent.clones[sprites.RoadTileComponent.clones.length - 1];
-        clone.costume = type;
-        clone.visible = true;
-        return clone;
-    }
 
     /**
      * @type {{ [key: CardinalPoint]: RoadTile }}
@@ -54,7 +42,8 @@ export class RoadTile {
         this.type = type;
         this.x = x;
         this.y = y;
-        const sprite = RoadTile.createComponent(type, x, y);
+        const sprite = Utils.cloneSprite(sprites.RoadTileComponent);
+        sprite.costume = type;
         sprite.worldObject = this;
         ViewportTransform.instance.rerender(sprite);
     }

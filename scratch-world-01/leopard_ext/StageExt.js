@@ -1,10 +1,33 @@
 import Stage from "../leopard/Stage/Stage.js";
 import { RoadTile, TileMovementController } from "./world/RoadTile.js";
-import { sprites } from "./index.js";
+import { TreeMP, sprites } from "./index.js";
+import { ViewportTransform } from "./ViewportTransform.js";
+import { Utils } from "./Utils.js";
 
 export default class StageExt extends Stage {
     *whenGreenFlagClicked() {
         yield* super.whenGreenFlagClicked();
+
+        const signal1 = Utils.cloneSprite(sprites.RailroadCrossingSignal);
+        ViewportTransform.instance.setCoordinates(signal1, -37, 5);
+
+        const signal2 = Utils.cloneSprite(sprites.RailroadCrossingSignal);
+        ViewportTransform.instance.setCoordinates(signal2, -100, 54);
+
+        ViewportTransform.instance.setCoordinates(sprites.IsometricHouse, 6, -100);
+        ViewportTransform.instance.setCoordinates(sprites.IsometricHouse2, -156, 32);
+
+        let tree = this._project.sprites[crypto.randomUUID()] = new TreeMP();
+        tree._project = this._project;
+        ViewportTransform.instance.setCoordinates(tree, -158, -96);
+
+        tree = this._project.sprites[crypto.randomUUID()] = new TreeMP();
+        tree._project = this._project;
+        ViewportTransform.instance.setCoordinates(tree, -118, -96);
+
+        tree = this._project.sprites[crypto.randomUUID()] = new TreeMP();
+        tree._project = this._project;
+        ViewportTransform.instance.setCoordinates(tree, -78, -96).setSpriteForSizeFineAdjustment(tree);
 
         console.log("creating road")
 
