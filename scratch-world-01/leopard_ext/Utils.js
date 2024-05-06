@@ -2,6 +2,14 @@ import {
     Sprite,
 } from "https://unpkg.com/leopard@^1/dist/index.esm.js";
 import { ViewportTransform } from "./ViewportTransform.js";
+import { FamiprogBlocks } from "./FamiprogBlocks.js";
+
+/**
+ * @typedef {{ name?: string, positionFineAdjustment?: boolean | any } | undefined} AddToProjectOptions
+ */
+
+// cf. doc, GeneratorFunction can only be obtained this way
+export const GeneratorFunction = function* () {}.constructor;
 
 export class Utils {
     static cloneSprite(sprite) {
@@ -18,6 +26,12 @@ export class Utils {
 
     static extend(spriteClass) {
         return class extends spriteClass {
+
+            /**
+             * @type {{ sprite: any, xRelative: number, yRelative: number }[] | undefined}
+             */
+            children;
+
             constructor(initialConditions = {}, vars = {}) {
                 const conditions = {
                     x: 0, y: 0, direction: 90, size: 100,
@@ -27,18 +41,45 @@ export class Utils {
                 Object.assign(conditions, initialConditions);
                 super(conditions, vars);
             }
+
+            /**
+             * @param {number} xRelative
+             * @param {number} yRelative
+             * @param {AddToProjectOptions} options
+             */
+            addChildToProject(sprite, xRelative, yRelative, options) {
+                if (!this.children) {
+                    this.children = [];
+                }
+                this.children.push({ sprite, xRelative, yRelative });
+                return Utils.addToProject(this._project, sprite, this.x_untransformed + xRelative, this.y_untransformed + yRelative, options);
+            }
+
+            goto(x, y, xUntransformed, yUntransformed) {
+                super.goto(x, y, xUntransformed, yUntransformed);
+                if (xUntransformed === undefined || !this.children) {
+                    return;
+                }
+                for (const childInfo of this.children) {
+                    ViewportTransform.instance.setCoordinates(childInfo.sprite, xUntransformed + childInfo.xRelative, yUntransformed + childInfo.yRelative);
+
+                }
+            }
         }
     }
 
     /**
      * @param {number} x 
      * @param {number} y 
-     * @param {{ name?: string, positionFineAdjustment?: boolean | any } | undefined} options 
+     * @param {AddToProjectOptions} options 
      */
     static addToProject(project, sprite, x, y, options) {
         const name = options?.name || crypto.randomUUID();
         project.sprites[name] = sprite;
         sprite._project = project;
+        if (sprite["onaddedtoproject"]) {
+            this.callGeneratorFunctionFromNormalFunction(project, sprite, "onaddedtoproject");
+        }
         ViewportTransform.instance.setCoordinates(sprite, x, y);
         if (options?.positionFineAdjustment) {
             if (options.positionFineAdjustment === true) {
@@ -49,4 +90,13 @@ export class Utils {
         }
         return sprite;
     }
+
+    static callGeneratorFunctionFromNormalFunction(project, object, functionName, ...args) {
+        const func = object[functionName];
+        const result = func.call(object, ...args);
+        if (object[functionName] instanceof GeneratorFunction) {
+            project.runningGenerators.push(result);
+        }
+    }
+
 }

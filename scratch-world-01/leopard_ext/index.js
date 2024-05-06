@@ -33,7 +33,28 @@ export const sprites = {
   }),
 };
 
-export const project = new Project(stage, sprites, {
+export const project = new class extends Project {
+
+  /**
+   * @type {Generator[]}
+   */
+  runningGenerators = [];
+
+  step() {
+    super.step();
+    let i = 0;
+    while (i < this.runningGenerators.length) {
+      const generator = this.runningGenerators[i];
+      const done = generator.next().done;
+      if (done) {
+        this.runningGenerators.splice(i, 1);
+      } else {
+        i++;
+      }
+    }
+  }
+
+}(stage, sprites, {
   frameRate: 30, // Set to 60 to make your project run faster
 });
 export default project;
