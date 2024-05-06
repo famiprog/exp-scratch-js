@@ -1,5 +1,5 @@
 import Stage from "../leopard/Stage/Stage.js";
-import { RoadTile, TileMovementController } from "./world/RoadTile.js";
+import { RoadTileExt, TileMovementController } from "./RoadTileExt.js";
 import { sprites } from "./index.js";
 import { ViewportTransform } from "./ViewportTransform.js";
 import { Utils } from "./Utils.js";
@@ -28,7 +28,7 @@ export default class StageExt extends Stage {
 
         console.log("creating road")
 
-        const firstTile = new RoadTile("h", -100, -50);
+        const firstTile = Utils.addToProject(this._project, new RoadTileExt("h", -100, -50), -100, -50);
         const lastTile = firstTile.add("h", "e").add("h")
             .repeat(3, t => t.add("h"))
             .repeat(3, t => t.add("br").add("tl"))
@@ -40,7 +40,7 @@ export default class StageExt extends Stage {
         lastTile.neighbours["e"] = firstTile;
         firstTile.neighbours["w"] = lastTile;
 
-        const firstTile2 = new RoadTile("h", -180, 0);
+        const firstTile2 = Utils.addToProject(this._project, new RoadTileExt("h", -180, 0), -180, 0);
         const lastTile2 = firstTile2.add("h", "e").repeat(6, t => t.add("h"))
             .add("tr").repeat(6, t => t.add("v"))
             .add("br").repeat(8, t => t.add("h"))

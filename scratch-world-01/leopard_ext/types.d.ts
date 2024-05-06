@@ -1,11 +1,11 @@
-import { RoadTile } from "./world/RoadTile";
+import { RoadTileExt } from "./world/RoadTileExt";
 
 export type CardinalPoint = "w" | "e" | "n" | "s";
 
 export interface IVehicle {
     vars: {
         speed: number;
-        currentTile: RoadTile;
+        currentTile: RoadTileExt;
         currentTilePosition?: number;
         currentTileEnteredThrough: CardinalPoint;
     },

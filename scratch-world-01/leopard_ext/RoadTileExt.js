@@ -1,20 +1,20 @@
-import { Utils } from "../Utils.js";
-import { ViewportTransform } from "../ViewportTransform.js";
-import { sprites } from "../index.js";
+import RoadTile from "../leopard/RoadTile/RoadTile.js";
+import { Utils } from "./Utils.js";
+import { ViewportTransform } from "./ViewportTransform.js";
 
 /**
- * @typedef {import("../types.js").CardinalPoint} CardinalPoint
- * @typedef {import("../types.js").IVehicle} IVehicle
+ * @typedef {import("./types.js").CardinalPoint} CardinalPoint
+ * @typedef {import("./types.js").IVehicle} IVehicle
  * @typedef {"h" | "v" | "br" | "tr" | "tl" | "bl"} RoadTileType
  */
 
 const TILE_SIZE = 16;
 const OPPOSITE = { w: "e", e: "w", n: "s", s: "n" };
 
-export class RoadTile {
+export class RoadTileExt extends Utils.extend(RoadTile) {
 
     /**
-     * @type {{ [key: CardinalPoint]: RoadTile }}
+     * @type {{ [key: CardinalPoint]: RoadTileExt }}
      */
     neighbours = {};
 
@@ -26,12 +26,12 @@ export class RoadTile {
     /**
      * @type {number}
      */
-    x;
+    x_untransformed;
 
     /**
      * @type {number}
      */
-    y;
+    y_untransformed;
 
     /**
      * @param {RoadTileType} type 
@@ -39,13 +39,12 @@ export class RoadTile {
      * @param {number} y 
      */
     constructor(type, x, y) {
+        super();
         this.type = type;
-        this.x = x;
-        this.y = y;
-        const sprite = Utils.cloneSprite(sprites.RoadTileComponent);
-        sprite.costume = type;
-        sprite.worldObject = this;
-        ViewportTransform.instance.rerender(sprite);
+        this.costume = type;
+
+        this.x_untransformed = x;
+        this.y_untransformed = y;
     }
 
     /**
@@ -73,13 +72,15 @@ export class RoadTile {
                 throw new Error("Cannot deduct the cardinal point. All are occupied.");
             }
         }
-        let newX = this.x;
-        let newY = this.y;
+        let newX = this.x_untransformed;
+        let newY = this.y_untransformed;
         if (cardinalPoint === "e") { newX += TILE_SIZE }
         else if (cardinalPoint === "w") { newX -= TILE_SIZE }
         else if (cardinalPoint === "n") { newY += TILE_SIZE }
         else if (cardinalPoint === "s") { newY -= TILE_SIZE }
-        const newTile = new RoadTile(type, newX, newY);
+        const newTile = new RoadTileExt(type, newX, newY);
+        Utils.addToProject(this._project, newTile, newX, newY);
+
         if (TileMovementController.get(newTile).cardinalPoints[0] !== OPPOSITE[cardinalPoint] && TileMovementController.get(newTile).cardinalPoints[1] !== OPPOSITE[cardinalPoint]) {
             throw new Error("The new tile is not compatible. Expecting it to have one of its cardinal points = " + OPPOSITE[cardinalPoint]);
         }
@@ -90,8 +91,8 @@ export class RoadTile {
 
     /**
      * @param {number} n 
-     * @param {(tile: RoadTile, i: number) => RoadTile} callback 
-     * @returns {RoadTile}
+     * @param {(tile: RoadTileExt, i: number) => RoadTileExt} callback 
+     * @returns {RoadTileExt}
      */
     repeat(n, callback) {
         let result = this;
@@ -110,7 +111,7 @@ export class TileMovementController {
     static instances;
 
     /**
-     * @param {RoadTile} tile 
+     * @param {RoadTileExt} tile 
      * @returns {TileMovementController}
      */
     static get(tile) {
@@ -132,7 +133,7 @@ export class TileMovementController {
     cardinalPoints;
 
     /**
-     * @param {RoadTile} tile
+     * @param {RoadTileExt} tile
      * @param {IVehicle} vehicle 
      * @param {number} pixelsToMove 
      */
@@ -196,7 +197,7 @@ export class TileMovementController {
 
     /**
      * @param {RoadTileExt} tile
-     * @param {import("../types.js").IVehicle} vehicle 
+     * @param {import("./types.js").IVehicle} vehicle 
      * @returns {[number, number]}
      */
     getScreenCoordinates(tile, vehicle) {
@@ -210,7 +211,7 @@ class TMC_WE extends TileMovementController {
     cardinalPoints = ["w", "e"];
 
     getScreenCoordinates(tile, vehicle) {
-        return [tile.x + vehicle.vars.currentTilePosition, tile.y - TILE_SIZE / 2];
+        return [tile.x_untransformed + vehicle.vars.currentTilePosition, tile.y_untransformed - TILE_SIZE / 2];
     }
 
 }
@@ -220,7 +221,7 @@ class TMC_NS extends TileMovementController {
     cardinalPoints = ["s", "n"];
 
     getScreenCoordinates(tile, vehicle) {
-        return [tile.x + TILE_SIZE / 2, tile.y + vehicle.vars.currentTilePosition - TILE_SIZE];
+        return [tile.x_untransformed + TILE_SIZE / 2, tile.y_untransformed + vehicle.vars.currentTilePosition - TILE_SIZE];
     }
 
 }
@@ -235,7 +236,7 @@ class TMC_BR extends TMC_Diagonal {
 
     getScreenCoordinates(tile, vehicle) {
         const percentage = vehicle.vars.currentTilePosition / this.length;
-        return [tile.x + percentage * TILE_SIZE / 2, tile.y + percentage * TILE_SIZE / 2 - TILE_SIZE / 2];
+        return [tile.x_untransformed + percentage * TILE_SIZE / 2, tile.y_untransformed + percentage * TILE_SIZE / 2 - TILE_SIZE / 2];
     }
 
 }
@@ -246,7 +247,7 @@ class TMC_TR extends TMC_Diagonal {
 
     getScreenCoordinates(tile, vehicle) {
         const percentage = vehicle.vars.currentTilePosition / this.length;
-        return [tile.x + TILE_SIZE / 2 - percentage * TILE_SIZE / 2, tile.y - TILE_SIZE + percentage * TILE_SIZE / 2];
+        return [tile.x_untransformed + TILE_SIZE / 2 - percentage * TILE_SIZE / 2, tile.y_untransformed - TILE_SIZE + percentage * TILE_SIZE / 2];
     }
 
 }
@@ -257,7 +258,7 @@ class TMC_TL extends TMC_Diagonal {
 
     getScreenCoordinates(tile, vehicle) {
         const percentage = vehicle.vars.currentTilePosition / this.length;
-        return [tile.x + TILE_SIZE - percentage * TILE_SIZE / 2, tile.y - TILE_SIZE / 2 - percentage * TILE_SIZE / 2];
+        return [tile.x_untransformed + TILE_SIZE - percentage * TILE_SIZE / 2, tile.y_untransformed - TILE_SIZE / 2 - percentage * TILE_SIZE / 2];
     }
 
 }
@@ -268,7 +269,7 @@ class TMC_BL extends TMC_Diagonal {
 
     getScreenCoordinates(tile, vehicle) {
         const percentage = vehicle.vars.currentTilePosition / this.length;
-        return [tile.x + TILE_SIZE / 2 + percentage * TILE_SIZE / 2, tile.y - percentage * TILE_SIZE / 2];
+        return [tile.x_untransformed + TILE_SIZE / 2 + percentage * TILE_SIZE / 2, tile.y_untransformed - percentage * TILE_SIZE / 2];
     }
 
 }

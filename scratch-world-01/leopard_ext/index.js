@@ -4,23 +4,13 @@ import {
 } from "https://unpkg.com/leopard@^1/dist/index.esm.js";
 
 import CityBus from "../leopard/CityBus/CityBus.js";
-import RoadTileComponent from "../leopard/RoadTileComponent/RoadTileComponent.js";
 import Truck from "../leopard/Truck/Truck.js";
 import StageExt from "./StageExt.js";
 
 const stage = new StageExt({ costumeNumber: 1 });
 
+// keeping these 2 vehicles for the moment, to remember the "classic" way of adding sprites in leopard
 export const sprites = {
-  RoadTileComponent: new RoadTileComponent({
-    x: 0,
-    y: 0,
-    direction: 90,
-    rotationStyle: Sprite.RotationStyle.ALL_AROUND,
-    costumeNumber: 2,
-    size: 100,
-    visible: false,
-    layerOrder: 1,
-  }),
   CityBus: new CityBus({
     x: -180,
     y: -121,

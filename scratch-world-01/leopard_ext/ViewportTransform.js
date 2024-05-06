@@ -101,6 +101,9 @@ export class ViewportTransform {
         }
         sprite.size = sizeUntransformedHolder.size_initial * this.scale;
 
+        // worldObject was, at the beginning, the approach to have Model (= world object) + View/Renderer (= the Scratch sprite)
+        // Abandoning for the moment, because it adds complexity. However, in the future, for multi-renderer capabilities, such an
+        // approach will be necessary
         if (!sprite.worldObject) {
             sprite.x_untransformed = x;
             sprite.y_untransformed = y;
