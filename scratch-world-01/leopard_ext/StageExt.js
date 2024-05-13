@@ -7,13 +7,21 @@ import Tree from "../leopard/Tree/Tree.js";
 import IsometricHouse from "../leopard/IsometricHouse/IsometricHouse.js";
 import IsometricHouse2 from "../leopard/IsometricHouse2/IsometricHouse2.js";
 import RailroadCrossingSignalExt from "./RailroadCrossingSignalExt.js";
+import { makeVehicleClass } from "./Vehicle.js";
+import CityBus from "../leopard/CityBus/CityBus.js";
+import Wagon from "../leopard/Wagon/Wagon.js";
+import { LocomotiveExt } from "./LocomotiveExt.js";
+import { WagonExt } from "./WagonExt.js";
 
 export default class StageExt extends Stage {
+
+    locomotive;
+
     *whenGreenFlagClicked() {
         yield* super.whenGreenFlagClicked();
 
-        Utils.addToProject(this._project, new RailroadCrossingSignalExt(), -37, 5);
-        Utils.addToProject(this._project, new RailroadCrossingSignalExt(), -100, 54);
+        Utils.addToProject(this._project, new RailroadCrossingSignalExt(), -37, 5, { name: "rcs1" });
+        Utils.addToProject(this._project, new RailroadCrossingSignalExt(), -100, 54, { name: "rcs2" });
 
         const IsometricHouseExt = Utils.extend(IsometricHouse);
         Utils.addToProject(this._project, new IsometricHouseExt(), 6, -100);
@@ -51,20 +59,42 @@ export default class StageExt extends Stage {
 
         console.log("finished creating road", firstTile, firstTile2);
 
-        const vehicle = sprites.CityBus;
-        vehicle.vars.speed = 10;
-        vehicle.vars.currentTileEnteredThrough = "w";
-        vehicle.vars.currentTile = firstTile;
+        // const vehicle2 = sprites.Truck;
+        // vehicle2.vars.speed = 4;
+        // vehicle2.vars.currentTileEnteredThrough = "w";
+        // vehicle2.vars.currentTile = firstTile2;
 
-        const vehicle2 = sprites.Truck;
-        vehicle2.vars.speed = 4;
-        vehicle2.vars.currentTileEnteredThrough = "w";
-        vehicle2.vars.currentTile = firstTile2;
+        // TODO 
+        // 1/ *onaddedtoproject currently starts on another "thread". That's why the init done before
+        // in RCSExt did not happen yet. Hence this "sleep"
+        // 2/ RCSExt / blinking is not OK to do in *onadded; it works only because of 1/. We should do it
+        // like in Buttonstartstop: the infinite loop separately
+        yield* this.wait(0.1);
 
-        while (true) {
-            TileMovementController.get(vehicle.vars.currentTile).move(vehicle.vars.currentTile, vehicle, vehicle.vars.speed);
-            TileMovementController.get(vehicle2.vars.currentTile).move(vehicle2.vars.currentTile, vehicle2, vehicle2.vars.speed);
-            yield;
-        }
+        this.locomotive = new LocomotiveExt();
+        this.locomotive.size = 10;
+        Utils.addToProject(this._project, this.locomotive, 0, 0);
+        yield* this.locomotive.putOnRoadTile(firstTile, "w");
+        yield* this.locomotive.move(23);
+
+        let wagon;
+
+        this.locomotive.wagon1 = wagon = new WagonExt();
+        wagon.size = 10;
+        Utils.addToProject(this._project, wagon, 0, 0);
+        yield* wagon.putOnRoadTile(firstTile, "w");
+        yield* this.locomotive.move(23);
+
+        this.locomotive.wagon2 = wagon = new WagonExt();
+        wagon.size = 10;
+        Utils.addToProject(this._project, wagon, 0, 0);
+        yield* wagon.putOnRoadTile(firstTile, "w");
+        yield* this.locomotive.move(23);
+
+        this.locomotive.wagon3 = wagon = new WagonExt();
+        wagon.size = 10;
+        wagon.lastWagon = true;
+        Utils.addToProject(this._project, wagon, 0, 0);
+        yield* wagon.putOnRoadTile(firstTile, "w");
     }
 }

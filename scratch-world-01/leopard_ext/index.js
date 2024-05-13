@@ -6,30 +6,41 @@ import {
 import CityBus from "../leopard/CityBus/CityBus.js";
 import Truck from "../leopard/Truck/Truck.js";
 import StageExt from "./StageExt.js";
+import Buttonmove from "../leopard/Buttonmove/Buttonmove.js";
+import Buttonstartstop from "../leopard/Buttonstartstop/Buttonstartstop.js";
 
 const stage = new StageExt({ costumeNumber: 1 });
 
-// keeping these 2 vehicles for the moment, to remember the "classic" way of adding sprites in leopard
 export const sprites = {
-  CityBus: new CityBus({
-    x: -180,
-    y: -121,
-    direction: 90,
-    rotationStyle: Sprite.RotationStyle.ALL_AROUND,
-    costumeNumber: 1,
-    size: 30,
-    visible: true,
-    layerOrder: 4,
-  }),
-  Truck: new Truck({
-    x: -169,
-    y: -150,
+  // Truck: new Truck({
+  //   x: -169,
+  //   y: -150,
+  //   direction: 90,
+  //   rotationStyle: Sprite.RotationStyle.ALL_AROUND,
+  //   costumeNumber: 2,
+  //   size: 30,
+  //   visible: true,
+  //   layerOrder: 5,
+  // }),
+  Buttonmove: new Buttonmove({
+    x: -200,
+    y: 176,
     direction: 90,
     rotationStyle: Sprite.RotationStyle.ALL_AROUND,
     costumeNumber: 2,
-    size: 30,
+    size: 100,
     visible: true,
-    layerOrder: 5,
+    layerOrder: 10,
+  }),
+  Buttonstartstop: new Buttonstartstop({
+    x: -114.3628179364716,
+    y: 176.39042617637676,
+    direction: 90,
+    rotationStyle: Sprite.RotationStyle.ALL_AROUND,
+    costumeNumber: 1,
+    size: 100,
+    visible: true,
+    layerOrder: 12,
   }),
 };
 
@@ -60,3 +71,6 @@ export const project = new class extends Project {
 export default project;
 
 project.sprites = { ...project.sprites };
+
+window.stage = stage;
+window.sprites = project.sprites

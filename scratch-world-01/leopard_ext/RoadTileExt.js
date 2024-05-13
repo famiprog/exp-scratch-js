@@ -13,6 +13,8 @@ const OPPOSITE = { w: "e", e: "w", n: "s", s: "n" };
 
 export class RoadTileExt extends Utils.extend(RoadTile) {
 
+    index = 0;
+
     /**
      * @type {{ [key: CardinalPoint]: RoadTileExt }}
      */
@@ -79,6 +81,7 @@ export class RoadTileExt extends Utils.extend(RoadTile) {
         else if (cardinalPoint === "n") { newY += TILE_SIZE }
         else if (cardinalPoint === "s") { newY -= TILE_SIZE }
         const newTile = new RoadTileExt(type, newX, newY);
+        newTile.index = this.index + 1;
         Utils.addToProject(this._project, newTile, newX, newY);
 
         if (TileMovementController.get(newTile).cardinalPoints[0] !== OPPOSITE[cardinalPoint] && TileMovementController.get(newTile).cardinalPoints[1] !== OPPOSITE[cardinalPoint]) {
@@ -137,7 +140,7 @@ export class TileMovementController {
      * @param {IVehicle} vehicle 
      * @param {number} pixelsToMove 
      */
-    move(tile, vehicle, pixelsToMove) {
+    *move(tile, vehicle, pixelsToMove) {
         const updated = this.getUpdatedPosition(vehicle, pixelsToMove);
         if (!updated.exitThrough) {
             // e.g. for we, len = 16, pos = 15
@@ -154,10 +157,10 @@ export class TileMovementController {
             if (!nextTile) {
                 throw new Error("Neighbor not found. Exiting through: " + updated.exitThrough);
             }
-            vehicle.vars.currentTile = nextTile;
+            yield* vehicle.setcurrenttile(nextTile);
             vehicle.vars.currentTilePosition = updated.newPosition;
             vehicle.vars.currentTileEnteredThrough = OPPOSITE[updated.exitThrough];
-            TileMovementController.get(nextTile).move(nextTile, vehicle, updated.remaining);
+            yield* TileMovementController.get(nextTile).move(nextTile, vehicle, updated.remaining);
         }
     }
 
