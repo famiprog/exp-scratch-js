@@ -1,4 +1,4 @@
-import project from "../../index";
+import { getProject }  from "../../leopardProjectMain";
 
 export class ViewportTransform {
     static instance = new ViewportTransform();
@@ -65,19 +65,7 @@ export class ViewportTransform {
                 }
             }
 
-            if (!event.shiftKey) {
-                return;
-            }
-
-            if (event.key === "ArrowRight") {
-                this.translateX -= 10;
-            } else if (event.key === "ArrowLeft") {
-                this.translateX += 10;
-            } else if (event.key === "ArrowUp") {
-                this.translateY -= 10;
-            } else if (event.key === "ArrowDown") {
-                this.translateY += 10;
-            } else if (event.key === "+") {
+            if (event.key === "+") {
                 this.scale += 0.1;
             } else if (event.key === "-") {
                 this.scale -= 0.1;
@@ -85,8 +73,23 @@ export class ViewportTransform {
                 this.scale = 1;
                 this.translateX = this.translateY = 0;
             } else {
-                return;
+                if (!event.shiftKey) {
+                    return;
+                }
+
+                if (event.key === "ArrowRight") {
+                    this.translateX -= 10;
+                } else if (event.key === "ArrowLeft") {
+                    this.translateX += 10;
+                } else if (event.key === "ArrowUp") {
+                    this.translateY -= 10;
+                } else if (event.key === "ArrowDown") {
+                    this.translateY += 10;
+                } else {
+                    return;
+                }
             }
+
             localStorage.setItem("famiprogViewportTransformation",
                 JSON.stringify({ translateX: this.translateX, translateY: this.translateY, scale: this.scale }));
             this.rerenderAll();
@@ -135,7 +138,7 @@ export class ViewportTransform {
      * Called after viewport adjusted. It should move/resize all sprites.
      */
     rerenderAll() {
-        for (const sprite of project.spritesAndClones) {
+        for (const sprite of getProject().spritesAndClones) {
             this.rerender(sprite);
         }
 

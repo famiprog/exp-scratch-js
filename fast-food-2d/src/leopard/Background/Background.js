@@ -9,7 +9,10 @@ import {
   Sound,
 } from "leopard";
 
-export default class Background extends Sprite {
+import { SpriteExt } from "../../leopard_ext/libEnhancements/SpriteExt";
+
+
+export default class Background extends SpriteExt {
   constructor(...args) {
     super(...args);
 
