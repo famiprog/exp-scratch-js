@@ -1,11 +1,7 @@
 import { Costume } from "leopard";
-import { MenuItem } from "semantic-ui-react";
-import App from "../../App";
-import { Utils } from "../utils/Utils";
 import { ActionableEntity } from "./ActionableEntity";
-import { ActionableEntityPopup } from "./ActionableEntityPopup";
+import { ActionsMenu } from "./ActionsMenu";
 import Character from "./Character";
-import MovingEntity from "./MovingEntity";
 
 export default class FriesBox extends ActionableEntity {
 
@@ -19,6 +15,8 @@ export default class FriesBox extends ActionableEntity {
       new Costume("empty", "./FriesBox/TCM_French Fry Box Side Empty.png", { x: 40, y: 51 }),
       new Costume("full", "./FriesBox/TCM_French Fry Box Side.png", { x: 34, y: 48 }),
     ];
+
+    this.actionsMenu = new ActionsMenu(this, ["fillPercentage"], ["beEatenGen"]);
 
   }
 
@@ -37,19 +35,7 @@ export default class FriesBox extends ActionableEntity {
     }
   }
 
-  protected showActions() {
-    App.INSTANCE.showPopup(() => <FriesBoxPopup entity={this} />);
-  }
-
-}
-
-class FriesBoxPopup extends ActionableEntityPopup<FriesBox> {
-  protected renderMenuItems() {
-    return <MenuItem icon="food" content="Eat" onClick={() => {
-      if (!MovingEntity.selectedMovingEntity) {
-        return;
-      }
-      Utils.startGenerator(() => (MovingEntity.selectedMovingEntity as Character).eat(this.props.entity));
-    }} />
+  *beEatenGen(character: Character) {
+    yield* character.eatGen(this);
   }
 }

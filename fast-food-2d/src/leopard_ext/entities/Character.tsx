@@ -1,12 +1,13 @@
 import { Costume, Sound } from "leopard";
-import App from "../../App";
 import { SpriteExt } from "../libEnhancements/SpriteExt";
-import { ActionableEntityPopup } from "./ActionableEntityPopup";
+import { ActionsMenu } from "./ActionsMenu";
 import MovingEntity from "./MovingEntity";
 
 export default class Character extends MovingEntity {
 
   hunger = 0;
+
+  protected actionsMenu: ActionsMenu;
 
   constructor(...args: unknown[]) {
     super(...args);
@@ -26,11 +27,13 @@ export default class Character extends MovingEntity {
 
     this.walkingCostumesNormal = [1, 2];
     this.walkingCostumesFlip = [3, 4];
+
+    this.actionsMenu = new ActionsMenu(this, ["hunger"], ["beHungrierGen"]);
   }
 
   *whenClicked() {
     if (this.selected) {
-      App.INSTANCE.showPopup(() => <ActionableEntityPopup entity={this} propsToShow={["hunger"]} />);
+      this.actionsMenu.show(this);
     }
     yield* super.whenClicked();
   }
@@ -39,7 +42,7 @@ export default class Character extends MovingEntity {
     yield* this.startSound("Footsteps");
   }
 
-  *eat(entity: SpriteExt) {
+  *eatGen(entity: SpriteExt) {
     if (this.hunger <= 0) {
       yield* this.sayAndWait("I'm not hungry", 2);
       return;
@@ -48,6 +51,11 @@ export default class Character extends MovingEntity {
     entity.dispose();
     yield* this.startSound("Yummy");
     yield* this.sayAndWait("I'm less hungry", 2);
+  }
+
+  *beHungrierGen() {
+    this.hunger++;
+    yield* this.sayAndWait("I'm hungrier", 2)
   }
 
 }

@@ -39,10 +39,17 @@ export class Utils {
     //     getProject().runningGenerators.push(generator);
     // }
 
-    static startGenerator(callbackReturningGenerator: () => Generator | undefined) {
+    /**
+     * The callback may return 1/ undefined or 2/ a non-generator.
+     * 
+     * 1/ maybe the expression contained an ?. inside, and returned undefined
+     * 2/ maybe the function called within the callback is a normal function
+     */
+    static startGenerator(callbackReturningGenerator: () => Generator | unknown) {
         const generator = callbackReturningGenerator();
-        if (generator) {
-            getProject().runningGenerators.push(generator);
-        } // else maybe the expression contained an ?. inside, and returned undefined
+        // @ts-expect-error use of reflection
+        if (typeof generator?.["next"] === "function") {
+            getProject().runningGenerators.push(generator as Generator);
+        } // else 1/ or 2/
     }
 }

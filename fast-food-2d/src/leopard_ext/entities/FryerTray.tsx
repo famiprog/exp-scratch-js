@@ -1,8 +1,7 @@
 import { Costume } from "leopard";
-import App from "../../App";
 import { ActionableEntity } from "./ActionableEntity";
-import { FryerTrayPopup } from "./FryerTrayPopup";
-import { Utils } from "../utils/Utils";
+import FriesBox from "./FriesBox";
+import { FryerTrayActionsMenu } from "./FryerTrayActionsMenu";
 
 export default class FryerTray extends ActionableEntity {
 
@@ -19,10 +18,8 @@ export default class FryerTray extends ActionableEntity {
       new Costume("FryerTray4", "./FryerTray/FryerTray4.png", { x: 56, y: 142 }),
       new Costume("FryerTray5", "./FryerTray/FryerTray5.png", { x: 56, y: 142 }),
     ];
-  }
 
-  protected showActions() {
-    App.INSTANCE.showPopup(() => <FryerTrayPopup entity={this} propsToShow={["fillPercentage"]} />);
+    this.actionsMenu = new FryerTrayActionsMenu(this, ["fillPercentage"], ["setEmpty", "setFull", "createFriesBox"]);
   }
 
   setFillPercentage(value: number) {
@@ -38,7 +35,19 @@ export default class FryerTray extends ActionableEntity {
     } else {
       this.costumeNumber = 5;
     }
-    Utils.startGenerator(() => this.sayAndWait("fillPercentage updated", 2));
+  }
+
+  setEmpty() {
+    this.setFillPercentage(0);
+  }
+
+  setFull() {
+    this.setFillPercentage(100);
+  }
+
+  createFriesBox() {
+    const fb = new FriesBox().addToProject(0, 0);
+    fb.setFillPercentage(100);
   }
 
 }

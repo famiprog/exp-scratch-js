@@ -3,6 +3,7 @@ import { Utils } from "../utils/Utils";
 // @ts-expect-error JS in TS
 import { ViewportTransform } from "../utils/ViewportTransform";
 import { getProject } from "../../leopardProjectMain";
+import { ActionsMenu } from "../entities/ActionsMenu";
 
 interface AddToProjectOptions {
     name?: string,
@@ -10,6 +11,8 @@ interface AddToProjectOptions {
 }
 
 export class SpriteExt extends Sprite {
+
+    protected actionsMenu?: ActionsMenu;
 
     shadowBlur?: number;
     shadowColor?: string;
@@ -27,6 +30,26 @@ export class SpriteExt extends Sprite {
         }
         Object.assign(conditions, initialConditions);
         super(conditions, vars);
+
+        const proto = this.constructor.prototype;
+        if (proto["instrumented"]) {
+            return;
+        }
+        setTimeout(() => {
+            if (!this.actionsMenu || proto["instrumented"]) { // check again is needed; if 2 consecutive constructions => constr 1, constr 2, instr 1, instr 2. during constr 2, instr did not yet happen 
+                return;
+            }
+
+            for (const f of this.actionsMenu.functionsToShow) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+                const original: Function = proto[f];
+                proto[f] = function (...args: unknown[]) {
+                    Utils.startGenerator(() => this.sayAndWait(f + "() called", 1));
+                    return original.apply(this, args);
+                }
+            }
+            proto["instrumented"] = true;
+        });
     }
 
     addToProject(x: number, y: number, options?: AddToProjectOptions): this {
@@ -45,6 +68,9 @@ export class SpriteExt extends Sprite {
                 ViewportTransform.instance.setSpriteForSizeFineAdjustment(this, options.positionFineAdjustment);
             }
         }
+
+        Utils.startGenerator(() => this.sayAndWait(this.constructor.name + " added", 1));
+
         return this;
     }
 

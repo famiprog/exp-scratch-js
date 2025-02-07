@@ -1,6 +1,7 @@
 import { Sound, Trigger } from "leopard";
 import { SpriteExt } from "../libEnhancements/SpriteExt";
 import { Utils } from "../utils/Utils";
+import Character from "./Character";
 import MovingEntity from "./MovingEntity";
 
 export class ActionableEntity extends SpriteExt {
@@ -36,6 +37,18 @@ export class ActionableEntity extends SpriteExt {
         setTimeout(this.checkCharacterCloseEnough, 300);
     }
 
+    protected getMovingEntityInActionableRange(): MovingEntity | undefined {
+        return MovingEntity.selectedMovingEntity;
+    }
+
+    protected getCharacterInActionableRange(): Character | undefined {
+        const c = this.getMovingEntityInActionableRange();
+        if (!(c instanceof Character)) {
+            return undefined;
+          }
+        return c as Character;
+    }
+
     *whenClicked() {
         // this.characterCloseEnough = true;
 
@@ -50,5 +63,6 @@ export class ActionableEntity extends SpriteExt {
     }
 
     protected showActions() {
+        this.actionsMenu?.show(this.getCharacterInActionableRange()!);
     }
 }
