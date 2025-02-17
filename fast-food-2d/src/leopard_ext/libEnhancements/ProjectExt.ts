@@ -1,5 +1,6 @@
 import { Project, Renderer } from "leopard";
 import { RendererExt } from "./RendererExt";
+import { Utils } from "../utils/Utils";
 
 export class ProjectExt extends Project {
 
@@ -21,5 +22,19 @@ export class ProjectExt extends Project {
                 i++;
             }
         }
+    }
+
+    public attach(renderTarget: string | HTMLElement): void {
+        super.attach(renderTarget);
+        this.renderer.stage.addEventListener("contextmenu", event => {
+            event.preventDefault()
+            const clickedSprite = this.renderer.pick(this.spritesAndClones, {
+                x: this.input.mouse.x,
+                y: this.input.mouse.y,
+            });
+            console.log("cli", clickedSprite)
+            // @ts-expect-error using reflection
+            Utils.startGenerator(() => clickedSprite["onRightClick"]?.());
+        });
     }
 }

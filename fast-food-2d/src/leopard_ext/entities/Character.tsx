@@ -31,10 +31,12 @@ export default class Character extends MovingEntity {
     this.actionsMenu = new ActionsMenu(this, ["hunger"], ["beHungrierGen"]);
   }
 
+  *onRightClick() {
+    this.actionsMenu.show(this);
+    yield* this.whenClicked();
+  }
+
   *whenClicked() {
-    if (this.selected) {
-      this.actionsMenu.show(this);
-    }
     yield* super.whenClicked();
   }
 

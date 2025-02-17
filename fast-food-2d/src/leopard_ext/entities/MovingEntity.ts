@@ -12,6 +12,8 @@ export default class MovingEntity extends SpriteExt {
   walkingCostumesNormal?: number[];
   walkingCostumesFlip?: number[];
 
+  stopPreviousFunctionExecutionHelper = new StopPreviousFunctionExecutionHelper();
+
   constructor(...args: unknown[]) {
     // @ts-expect-error using args
     super(...args);
@@ -69,6 +71,11 @@ export default class MovingEntity extends SpriteExt {
    * @param y idem
    */
   protected *walkInternal(x?: number, y?: number): Generator<void, void, boolean> {
+    const my = yield* this.stopPreviousFunctionExecutionHelper.begin();
+    if (my === undefined) {
+      return;
+    }
+
     // @ts-expect-error it has next as void; this as boolean; but it's OK
     yield* this.playWalkSound();
     if (x !== undefined && y !== undefined) {
@@ -89,6 +96,8 @@ export default class MovingEntity extends SpriteExt {
       this.move(10);
       if (!(iter++ % 4)) {
         const costumes = normal ? walkingCostumesNormal : walkingCostumesFlip;
+        // w/o this, I would have a flicker sometimes
+        this.shadowChanged = true;
         this.costumeNumber = costumes[nextCostumeIndex];
         nextCostumeIndex = (++nextCostumeIndex) % costumes.length;
       }
@@ -96,8 +105,13 @@ export default class MovingEntity extends SpriteExt {
       if ((x === undefined || y === undefined) && !shouldContinue) {
         break;
       }
+      if (this.stopPreviousFunctionExecutionHelper.shouldBreakLoop(my)) {
+        return;
+      }
     }
     this.stopAllSounds();
+
+    this.stopPreviousFunctionExecutionHelper.end(my);
   }
 
   protected *walkWithKeysLoop() {
@@ -130,6 +144,74 @@ export default class MovingEntity extends SpriteExt {
       generatorWalk?.next(true);
 
       yield;
+    }
+  }
+}
+
+/**
+ * In the context of a function that can be started from multiple "threads" (i.e. not all generators belonging to a single main loop),
+ * we want to stop the previous function, before continuing. There is also the case where during the stopping phase (when someone waits), 
+ * somebody else invokes. So for call A, B, C: B will order stop and it won't run.
+ */
+class StopPreviousFunctionExecutionHelper {
+
+  /**
+   * State off; after a normal run.
+   */
+  walkSession = 0;
+
+  *begin() {
+    const observedWalkSession = this.walkSession;
+    // e.g. 0 => 1, was off, and now will walk
+    // 3 => 4, // was walking, so it will stop, and it will continue here; changing this will lead to breaking the loop of 3
+    // -8 => 9 // call/session 8 requested a stop, which happened; but before 8 can continue, this was called again, hence here I am
+    const myWalkSession = this.walkSession = Math.abs(this.walkSession) + 1;
+    // console.log("start", myWalkSession);
+    
+    // walk in progress
+    if (observedWalkSession > 0) {
+      // console.log("pre waiting", this.walkSession, myWalkSession)
+
+      // let's wait until we see a change
+      while (this.walkSession === myWalkSession) {
+        // console.log("waiting", this.walkSession)
+        yield;
+      }
+      // console.log("finished waiting", this.walkSession)
+      // a change happened; 
+
+      if (-this.walkSession != myWalkSession) {
+        // but maybe while I was waiting, somebody else requested as well; in this case, I abandon
+        return undefined;
+      } else {
+        // it was my request; so I will continue
+        this.walkSession = -this.walkSession;
+      }
+
+      // console.log("continuing after waiting", this.walkSession)
+    }
+    return myWalkSession;
+  } // else walk not in progress; either 0 or another call was just stopped
+
+  shouldBreakLoop(myWalkSession: number) {
+    // e.g. 3 !== 4 or 3 !== 5; so I exit communicating what was the break signal (by changing sign); because maybe we have 2 requesters
+    if (this.walkSession !== myWalkSession) {
+      // console.log("forced exit", myWalkSession, "requested by", this.walkSession)
+      this.walkSession = -this.walkSession;
+      return true;
+    }
+    return false;
+  }
+
+  end(myWalkSession: number) {
+    if (this.walkSession !== myWalkSession) {
+      // console.log("forced exit DOWN", myWalkSession, "requested by", this.walkSession)
+      // I observed corner cases when the new call would come right when the previous call has just stopped normally;
+      // I need this; because if I return 0, the next call would not work; it has requested a stop; neither the stop comes, nor a change
+      this.walkSession = -this.walkSession;
+    } else {
+      // console.log("normal exit", myWalkSession);
+      this.walkSession = 0;
     }
   }
 }
